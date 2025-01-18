@@ -18,6 +18,9 @@ export class Scene {
     this.camera.lookAt(0, 0, 0)
 
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(this.renderer.domElement);
 
@@ -32,13 +35,15 @@ export class Scene {
     this.scene.add(directionalLight);
 
 
+    // 🌟 Create a Plane for the Shadow
     const shadowPlane = new THREE.Mesh(
-      new THREE.PlaneGeometry(20, 20),
-      new THREE.ShadowMaterial({ opacity: 0.9 })
+      new THREE.PlaneGeometry(50, 50), // Shadow size
+      Utils.shadowShader()
     );
+
     shadowPlane.rotation.x = -Math.PI / 2;
-    shadowPlane.position.y = -3;
-    shadowPlane.receiveShadow = true;
+    shadowPlane.position.y = -5; 
+    shadowPlane.renderOrder = 1;
     this.scene.add(shadowPlane);
 
 

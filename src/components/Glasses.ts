@@ -22,6 +22,9 @@ export class Glasses {
 
       this.model.traverse((child) => {
         if (child instanceof THREE.Mesh) {
+          child.castShadow = true; // Permettiamo che gli occhiali proiettino ombre
+        }
+        if (child instanceof THREE.Mesh) {
           console.log(child)
           if (child.name.includes("Glasses_Glasses")) {  // Modify the frame material
             child.material = new THREE.MeshStandardMaterial({
