@@ -9,7 +9,7 @@ export class Scene {
   public renderer: THREE.WebGLRenderer;
 
   constructor(canvas: HTMLCanvasElement) {
-
+    
     this.scene = new THREE.Scene();
 
     this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);

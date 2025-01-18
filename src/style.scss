@@ -75,3 +75,12 @@ button#cat {
   }
 }
 
+video {
+  opacity: 1 !important;
+  z-index: 1000;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 100%;
+  height: 100%;
+}
