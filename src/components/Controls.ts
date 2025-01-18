@@ -10,7 +10,7 @@ export class Controls {
     controls.rotateSpeed = 0.8;
     controls.zoomSpeed = 1.2;
 
-    controls.minPolarAngle = Math.PI / 2; 
+    controls.minPolarAngle = Math.PI / 4; 
     controls.maxPolarAngle = Math.PI / 2;
     controls.enableRotate = true; 
     controls.enableZoom = true; 

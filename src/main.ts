@@ -14,5 +14,4 @@ const sceneInstance = new Scene(canvas);
 const glasses = new Glasses(sceneInstance.scene);
 new Controls(sceneInstance.camera, sceneInstance.renderer);
 
-
 sceneInstance.animate();
