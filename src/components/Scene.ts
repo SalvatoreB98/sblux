@@ -48,7 +48,7 @@ export class Scene {
 
 
     const rgbeLoader = new RGBELoader();
-    rgbeLoader.load('/imgs/field.hdr', (texture) => {
+    rgbeLoader.load('/imgs/hdr3.hdr', (texture) => {
       texture.mapping = THREE.EquirectangularReflectionMapping;
       this.scene.environment = texture;
     });
