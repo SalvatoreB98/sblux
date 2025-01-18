@@ -27,8 +27,20 @@ export class Scene {
     this.scene.add(ambientLight);
 
     const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-    directionalLight.position.set(5, 10, 5);
+    directionalLight.position.set(2, 5, 5);
+    directionalLight.castShadow = true;
     this.scene.add(directionalLight);
+
+
+    const shadowPlane = new THREE.Mesh(
+      new THREE.PlaneGeometry(20, 20),
+      new THREE.ShadowMaterial({ opacity: 0.9 })
+    );
+    shadowPlane.rotation.x = -Math.PI / 2;
+    shadowPlane.position.y = -3;
+    shadowPlane.receiveShadow = true;
+    this.scene.add(shadowPlane);
+
 
     const rgbeLoader = new RGBELoader();
     rgbeLoader.load('/imgs/field.hdr', (texture) => {

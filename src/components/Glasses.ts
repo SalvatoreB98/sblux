@@ -1,12 +1,15 @@
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as THREE from 'three';
+import { Animations } from '../utils/Animations';
 
 export class Glasses {
   private model: THREE.Object3D | null = null;
+  modelAnimations: Animations | undefined;
 
   constructor(private scene: THREE.Scene) {
     this.loadModel();
     this.colorsControls();
+    this.animate();
   }
 
   private loadModel() {
@@ -31,6 +34,8 @@ export class Glasses {
       });
 
       this.scene.add(this.model);
+      this.modelAnimations = new Animations(this.model);
+      this.modelAnimations.fadeIn();
     }, undefined, (error) => {
       console.error('Error loading glasses model:', error);
     });
@@ -43,10 +48,21 @@ export class Glasses {
           this.model?.traverse((child) => {
             if (child instanceof THREE.Mesh && child.name.includes("Glasses_Glasses")) {
               child.material.color.set(color);
+              this.modelAnimations?.fadeIn();
+              child.material.metalness = 0.4;
+              console.log(child.material)
             }
           });
         }
       });
     });
+  }
+  animate() {
+    const animateRotation = () => {
+      requestAnimationFrame(animateRotation);
+      if (this.model)
+        this.model.rotation.y += 0.005;
+    }
+    animateRotation();
   }
 }

@@ -7,7 +7,7 @@ export class Utils {
    * @param size Size of the object (default: 5)
    * @returns THREE.Mesh (the created object)
    */
-  public static createGradientObject(shape: "box" | "sphere" = "box", size: number = 50): THREE.Mesh {
+  public static createGradientObject(shape: "box" | "sphere" = "box", size: number = 500): THREE.Mesh {
     let geometry: THREE.BufferGeometry;
 
     // 🔹 Choose Geometry Type with Adjustable Size
