@@ -4,9 +4,9 @@ import { IHeadRotation } from '../../../utils/Interfaces';
 export class FaceTracker {
   video: HTMLVideoElement;
   static faceMeshInstance: FaceMesh | null = null; // Singleton instance
-  onResultsCallback: (faceLandmarks: any, headRotation?: IHeadRotation, scaleFactor?: number) => void;
+  onResultsCallback: (faceLandmarks: any, position: any,  headRotation?: IHeadRotation, scaleFactor?: number) => void;
 
-  constructor(videoElement: HTMLVideoElement, onResultsCallback: (faceLandmarks: any, headRotation?: { yaw: number, pitch: number, roll: number }, scaleFactor?: number) => void) {
+  constructor(videoElement: HTMLVideoElement, onResultsCallback: (faceLandmarks: any, position: any, headRotation?: { yaw: number, pitch: number, roll: number }, scaleFactor?: number) => void) {
     this.video = videoElement;
     this.onResultsCallback = onResultsCallback;
 
@@ -29,14 +29,14 @@ export class FaceTracker {
       if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
         const faceLandmarks = results.multiFaceLandmarks[0];
 
-        // Estimate head rotation
-        const headRotation = this.estimateHeadPose(faceLandmarks);
+        // Get head rotation & position
+        const { yaw, pitch, roll, position } = this.estimateHeadPose(faceLandmarks);
 
-        // Compute scale based on eye distance
+        // Compute scale factor
         const scaleFactor = this.computeScale(faceLandmarks);
 
         // Callback with landmarks, rotation & scale
-        this.onResultsCallback(faceLandmarks, headRotation, scaleFactor);
+        this.onResultsCallback(faceLandmarks, position, { yaw, pitch, roll }, scaleFactor);
       }
     });
 
@@ -66,8 +66,8 @@ export class FaceTracker {
   /**
    * Estimate head pose based on facial landmarks (yaw, pitch, roll).
    */
-  estimateHeadPose(faceLandmarks: any): { yaw: number, pitch: number, roll: number } {
-    // Define reference points for head tracking
+  estimateHeadPose(faceLandmarks: any): { yaw: number, pitch: number, roll: number, position: { x: number, y: number, z: number } } {
+    // Define reference points
     const referencePoints = {
       noseTip: 1,   // Nose Tip
       leftEye: 33,  // Left Eye Corner
@@ -80,17 +80,25 @@ export class FaceTracker {
     const leftEye = faceLandmarks[referencePoints.leftEye];
     const rightEye = faceLandmarks[referencePoints.rightEye];
 
-    // Compute yaw (left/right rotation) - Based on eye positions
+    // Compute yaw (left/right rotation)
     const yaw = Math.atan2(rightEye.x - leftEye.x, rightEye.z - leftEye.z) * (180 / Math.PI);
 
-    // Compute pitch (up/down rotation) - Based on nose to chin position
+    // Compute pitch (up/down rotation)
     const pitch = Math.atan2(chin.y - nose.y, chin.z - nose.z) * (180 / Math.PI);
 
-    // Compute roll (tilt rotation) - Based on eye alignment
+    // Compute roll (tilt rotation)
     const roll = Math.atan2(rightEye.y - leftEye.y, rightEye.x - leftEye.x) * (180 / Math.PI);
 
-    return { yaw, pitch, roll };
+    // Compute head position (centroid of main landmarks)
+    const position = {
+      x: (nose.x + leftEye.x + rightEye.x + chin.x) / 4,
+      y: (nose.y + leftEye.y + rightEye.y + chin.y) / 4,
+      z: (nose.z + leftEye.z + rightEye.z + chin.z) / 4,
+    };
+
+    return { yaw, pitch, roll, position };
   }
+
 
   /**
    * Compute scale factor based on the distance between eyes.

@@ -20,34 +20,49 @@ export class Glasses extends EventEmitter {
         this.emitter.emit("loaded", this.model)
       },
       undefined,
-      (error) => console.log("Error loading model")
+      (error) => console.log("Error loading model", error)
     );
   }
 
-  updatePosition(facePosition: THREE.Vector3, headRotation: IHeadRotation, scale: number) {
+  updatePosition(facePosition: THREE.Vector3, headPosition: any, headRotation: IHeadRotation, scale: number) {
     if (this.model) {
-      // Update position with smooth interpolation
-      this.model.position.lerp(facePosition, 0.5);
+      const sceneScaleFactor = 2.5; // Adjust based on scene size
+      const offsetX = -0.5; 
+      const offsetY = 0.52;
+      const offsetZ = 0.2; 
 
-      // Convert degrees to radians (Three.js uses radians)
+      // Map Mediapipe coords to Three.js world space
+      const mappedPosition = new THREE.Vector3(
+        (headPosition.x + offsetX) * sceneScaleFactor,
+        (-headPosition.y + offsetY) * sceneScaleFactor,
+        (headPosition.z + offsetZ) * sceneScaleFactor
+      );
+
+      // Smoothly interpolate position
+      const smoothFactor = 0.2;
+      this.model.position.lerp(mappedPosition, smoothFactor);
+
+      // Convert rotation degrees to radians
       const yawRad = THREE.MathUtils.degToRad(headRotation.yaw);
       const pitchRad = THREE.MathUtils.degToRad(headRotation.pitch);
       const rollRad = THREE.MathUtils.degToRad(headRotation.roll);
 
-      // Apply rotation based on head movement
+      // Apply rotation to glasses
       this.model.rotation.set(
         -pitchRad,
         rollRad,
-        -yawRad 
-      ); 
+        -yawRad
+      );
+
       console.log("Updated Rotation:", { yaw: yawRad, pitch: pitchRad, roll: rollRad });
 
       // Adjust scale dynamically based on face size
-      const deltaScale = 0.025;
-      this.model.scale.set(scale * deltaScale, scale * deltaScale, scale * deltaScale)
+      const deltaScale = 0.02;
+      this.model.scale.set(scale * deltaScale, scale * deltaScale, scale * deltaScale);
     } else {
       console.error("Glasses model is not initialized yet");
     }
   }
+
 
 }

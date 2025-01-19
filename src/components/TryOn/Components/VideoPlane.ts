@@ -5,10 +5,10 @@ import { IHeadRotation } from '../../../utils/Interfaces';
 export class VideoPlane {
   video: HTMLVideoElement;
   faceTracker: FaceTracker;
-  onFaceDetected: (position: THREE.Vector3, headRotation: IHeadRotation, scale: number) => void;
+  onFaceDetected: (position: THREE.Vector3, headPosition: any, headRotation: IHeadRotation, scale: number) => void;
   testVideo: HTMLVideoElement; // Webcam Test Video
 
-  constructor(scene: THREE.Scene, onFaceDetected: (position: THREE.Vector3, headRotation: IHeadRotation, scale: number) => void) {
+  constructor(scene: THREE.Scene, onFaceDetected: (position: THREE.Vector3, headPosition: any, headRotation: IHeadRotation, scale: number) => void) {
     this.video = document.createElement('video');
     this.video.autoplay = true;
     this.video.muted = true;
@@ -23,9 +23,9 @@ export class VideoPlane {
     this.testVideo.style.position = 'absolute';
     this.testVideo.style.top = '0';
     this.testVideo.style.right = '0';
+    this.testVideo.style.left = '0';
     this.testVideo.style.width = '100%';
     this.testVideo.style.height = '100%';
-    this.testVideo.style.border = '2px solid white';
     this.testVideo.style.backgroundColor = 'black';
     this.testVideo.style.zIndex = '1'
     document.body.appendChild(this.testVideo);
@@ -34,7 +34,7 @@ export class VideoPlane {
     this.startCamera();
 
     // Start Face Tracking
-    this.faceTracker = new FaceTracker(this.video, (landmarks, headRotation, scale) => {
+    this.faceTracker = new FaceTracker(this.video, (landmarks, headPosition, headRotation, scale) => {
       if (landmarks && landmarks[168]) {
         const noseBridge = landmarks[168];
         const position = new THREE.Vector3(
@@ -46,7 +46,7 @@ export class VideoPlane {
         if (this.onFaceDetected) {
           const safeHeadRotation: IHeadRotation = headRotation ?? { yaw: 0, pitch: 0, roll: 0 };
           const safeScale: number = scale ?? 1;
-          this.onFaceDetected(position, safeHeadRotation, safeScale);
+          this.onFaceDetected(position, headPosition, safeHeadRotation, safeScale);
         }
       }
     });

@@ -8,7 +8,7 @@ export class Experience {
   canvas: HTMLCanvasElement;
   tryOnSceneInstance: TryOnScene | undefined;
   sceneInstance: Scene | undefined;
-
+  isTryOn: boolean = false;
   constructor() {
     this.canvas = document.querySelector<HTMLCanvasElement>('#webglCanvas')!;
     this.renderShowRoom();
@@ -29,6 +29,9 @@ export class Experience {
     new Glasses(this.sceneInstance.scene);
     new Controls(this.sceneInstance.camera, this.sceneInstance.renderer);
     this.sceneInstance.animate();
+    this.isTryOn = false;
+    const button = document.getElementById("cat")
+    button ? button.innerHTML = 'Provali ora!' : null;
   }
 
   renderTryOn() {
@@ -38,5 +41,8 @@ export class Experience {
       myCanvas.parentElement.removeChild(myCanvas);
     }
     this.tryOnSceneInstance = new TryOnScene(this.canvas);
+    this.isTryOn = true;
+    const button = document.getElementById("cat")
+    button ? button.innerHTML = 'Esci' : null;
   }
 }
