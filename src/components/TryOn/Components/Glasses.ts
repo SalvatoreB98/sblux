@@ -27,9 +27,9 @@ export class Glasses extends EventEmitter {
   updatePosition(facePosition: THREE.Vector3, headPosition: any, headRotation: IHeadRotation, scale: number) {
     if (this.model) {
       const sceneScaleFactor = 2.5; // Adjust based on scene size
-      const offsetX = -0.5; 
+      const offsetX = -0.5;
       const offsetY = 0.52;
-      const offsetZ = 0.2; 
+      const offsetZ = 0.2;
 
       // Map Mediapipe coords to Three.js world space
       const mappedPosition = new THREE.Vector3(
@@ -47,12 +47,18 @@ export class Glasses extends EventEmitter {
       const pitchRad = THREE.MathUtils.degToRad(headRotation.pitch);
       const rollRad = THREE.MathUtils.degToRad(headRotation.roll);
 
-      // Apply rotation to glasses
-      this.model.rotation.set(
+      // Create a target quaternion from the Euler angles
+      const targetQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(
         -pitchRad,
         rollRad,
         -yawRad
-      );
+      ));
+
+      // Interpolation factor (adjust for smoothness)
+      const lerpFactor = 0.1; // 0.1 means 10% of the way to the target per frame
+
+      // Apply quaternion slerp for smooth rotation
+      this.model.quaternion.slerp(targetQuat, lerpFactor);
 
       console.log("Updated Rotation:", { yaw: yawRad, pitch: pitchRad, roll: rollRad });
 
