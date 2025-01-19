@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { VideoPlane } from './VideoPlane';
 import { Glasses } from './Glasses';
+import { IHeadRotation } from '../../../utils/Interfaces';
 
 export class TryOnScene {
   scene: THREE.Scene;
@@ -22,7 +23,7 @@ export class TryOnScene {
     this.camera.position.set(0, 0, 2);
 
     // 🔹 Enable transparency in renderer
-    this.renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+    this.renderer = new THREE.WebGLRenderer({ alpha: true });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setClearColor(0x000000, 0); // 🔹 Transparent clear color
 
@@ -38,9 +39,9 @@ export class TryOnScene {
   }
 
   // Define onFaceDetected correctly
-  onFaceDetected(facePosition: THREE.Vector3) {
+  onFaceDetected(position: THREE.Vector3, rotation: IHeadRotation , scale: number) {
     if (this.glasses) {
-      this.glasses.updatePosition(facePosition);
+      this.glasses.updatePosition(position, rotation, scale);
     } else {
       console.error('Glasses instance is missing');
     }

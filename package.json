@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@mediapipe/face_mesh": "^0.4.1633559619",
+    "eventemitter3": "^5.0.1",
     "gsap": "^3.12.7",
     "three": "^0.172.0"
   }

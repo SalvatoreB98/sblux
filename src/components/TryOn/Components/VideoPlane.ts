@@ -1,13 +1,14 @@
 import * as THREE from 'three';
 import { FaceTracker } from './FaceTracker';
+import { IHeadRotation } from '../../../utils/Interfaces';
 
 export class VideoPlane {
   video: HTMLVideoElement;
   faceTracker: FaceTracker;
-  onFaceDetected: (position: THREE.Vector3) => void;
+  onFaceDetected: (position: THREE.Vector3, headRotation: IHeadRotation, scale: number) => void;
   testVideo: HTMLVideoElement; // Webcam Test Video
 
-  constructor(scene: THREE.Scene, onFaceDetected: (position: THREE.Vector3) => void) {
+  constructor(scene: THREE.Scene, onFaceDetected: (position: THREE.Vector3, headRotation: IHeadRotation, scale: number) => void) {
     this.video = document.createElement('video');
     this.video.autoplay = true;
     this.video.muted = true;
@@ -33,7 +34,7 @@ export class VideoPlane {
     this.startCamera();
 
     // Start Face Tracking
-    this.faceTracker = new FaceTracker(this.video, (landmarks) => {
+    this.faceTracker = new FaceTracker(this.video, (landmarks, headRotation, scale) => {
       if (landmarks && landmarks[168]) {
         const noseBridge = landmarks[168];
         const position = new THREE.Vector3(
@@ -43,7 +44,9 @@ export class VideoPlane {
         );
 
         if (this.onFaceDetected) {
-          this.onFaceDetected(position);
+          const safeHeadRotation: IHeadRotation = headRotation ?? { yaw: 0, pitch: 0, roll: 0 };
+          const safeScale: number = scale ?? 1;
+          this.onFaceDetected(position, safeHeadRotation, safeScale);
         }
       }
     });
@@ -72,12 +75,6 @@ export class VideoPlane {
       };
     } catch (error) {
       console.error('Error accessing webcam:', error);
-    }
-  }
-
-  updateTexture() {
-    if (this.texture) {
-      this.texture.needsUpdate = true; // Ensure texture updates each frame
     }
   }
 }

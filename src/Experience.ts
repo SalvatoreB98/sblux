@@ -15,6 +15,16 @@ export class Experience {
   }
 
   renderShowRoom() {
+    const myCanvas = document.querySelector<HTMLCanvasElement>("canvas");
+
+    if (myCanvas && myCanvas.parentElement) {
+      myCanvas.parentElement.removeChild(myCanvas);
+    }
+    const myVideo = document.querySelector<HTMLVideoElement>("video");
+
+    if (myVideo && myVideo.parentElement) {
+      myVideo.parentElement.removeChild(myVideo);
+    }
     this.sceneInstance = new Scene(this.canvas);
     new Glasses(this.sceneInstance.scene);
     new Controls(this.sceneInstance.camera, this.sceneInstance.renderer);
@@ -22,6 +32,11 @@ export class Experience {
   }
 
   renderTryOn() {
+    const myCanvas = document.querySelector<HTMLCanvasElement>("canvas");
+
+    if (myCanvas && myCanvas.parentElement) {
+      myCanvas.parentElement.removeChild(myCanvas);
+    }
     this.tryOnSceneInstance = new TryOnScene(this.canvas);
   }
 }
