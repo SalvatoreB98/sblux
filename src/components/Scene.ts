@@ -13,7 +13,7 @@ export class Scene {
     this.scene = new THREE.Scene();
 
     this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-    this.camera.position.set(5, 30, 30);
+    this.camera.position.set(5, 90, 3);
     this.camera.zoom = 2
     this.camera.lookAt(0, 0, 0)
 

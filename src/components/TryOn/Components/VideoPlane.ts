@@ -22,9 +22,9 @@ export class VideoPlane {
     this.testVideo.playsInline = true;
     this.testVideo.style.position = 'absolute';
     this.testVideo.style.top = '0';
-    this.testVideo.style.right = '0';
-    this.testVideo.style.left = '0';
-    this.testVideo.style.width = '100%';
+    this.testVideo.style.left = '50%';
+    this.testVideo.style.transform = 'translateX(-50%)';
+    this.testVideo.style.width = '768px';
     this.testVideo.style.height = '100%';
     this.testVideo.style.backgroundColor = 'black';
     this.testVideo.style.zIndex = '1'

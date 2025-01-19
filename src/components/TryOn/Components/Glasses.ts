@@ -1,74 +1,103 @@
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { IHeadRotation } from '../../../utils/Interfaces';
-import EventEmitter from 'eventemitter3';
+import * as THREE from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { IHeadRotation } from "../../../utils/Interfaces";
+import EventEmitter from "eventemitter3";
+import GUI from "lil-gui";
 
 export class Glasses extends EventEmitter {
   model: THREE.Object3D | null = null;
   emitter = new EventEmitter();
 
+  // GUI-controlled parameters
+  params = {
+    scale: 1.25,
+    offsetX: -0.50,
+    offsetY: 0.54,
+    offsetZ: 0.2,
+    rotationX: 0,
+    rotationY: 0,
+    rotationZ: 0,
+    scaleFactor: 2.5
+  };
+
   constructor(scene: THREE.Scene) {
     super();
     const loader = new GLTFLoader();
     loader.load(
-      '/models/glasses2.glb', // Replace with the actual model path
+      "/models/glasses2.glb",
       (gltf) => {
         this.model = gltf.scene;
         this.model.scale.set(0.1, 0.1, 0.1);
         this.model.position.set(0, 0, 1);
+        const bbox = new THREE.Box3().setFromObject(this.model);
+        const modelCenter = bbox.getCenter(new THREE.Vector3());
+        this.model.position.sub(modelCenter); // Shift the model so its center aligns with the origin
         scene.add(this.model);
-        this.emitter.emit("loaded", this.model)
+        this.emitter.emit("loaded", this.model);
       },
       undefined,
       (error) => console.log("Error loading model", error)
     );
+
+    this.createGUI();
   }
 
+  /**
+   * Called from an external class to update position dynamically.
+   */
   updatePosition(facePosition: THREE.Vector3, headPosition: any, headRotation: IHeadRotation, scale: number) {
-    if (this.model) {
-      const sceneScaleFactor = 2.5; // Adjust based on scene size
-      const offsetX = -0.5;
-      const offsetY = 0.52;
-      const offsetZ = 0.2;
+    if (!this.model) return;
 
-      // Map Mediapipe coords to Three.js world space
-      const mappedPosition = new THREE.Vector3(
-        (headPosition.x + offsetX) * sceneScaleFactor,
-        (-headPosition.y + offsetY) * sceneScaleFactor,
-        (headPosition.z + offsetZ) * sceneScaleFactor
-      );
+    const headWidth = Math.abs(headPosition.x - facePosition.x); // Distance between facial landmarks
+    const sceneScaleFactor = headWidth * 2; // Dynamically scale glasses based on head size
+    const smoothFactor = 0.2;
+    const lerpFactor = 0.1;
 
-      // Smoothly interpolate position
-      const smoothFactor = 0.2;
-      this.model.position.lerp(mappedPosition, smoothFactor);
+    // Blend GUI modifications with real-time tracking data
+    const mappedPosition = new THREE.Vector3(
+      headPosition.x * sceneScaleFactor,
+      -headPosition.y * sceneScaleFactor,
+      headPosition.z * sceneScaleFactor
+    );
+    this.model.position.lerp(mappedPosition, smoothFactor);
 
-      // Convert rotation degrees to radians
-      const yawRad = THREE.MathUtils.degToRad(headRotation.yaw);
-      const pitchRad = THREE.MathUtils.degToRad(headRotation.pitch);
-      const rollRad = THREE.MathUtils.degToRad(headRotation.roll);
+    // Smoothly interpolate position
+    this.model.position.lerp(mappedPosition, smoothFactor);
 
-      // Create a target quaternion from the Euler angles
-      const targetQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(
-        -pitchRad,
-        rollRad,
-        -yawRad
-      ));
+    // Rotation adjustments
+    const yawRad = THREE.MathUtils.degToRad(headRotation.yaw + this.params.rotationY);
+    const pitchRad = THREE.MathUtils.degToRad(headRotation.pitch + this.params.rotationX);
+    const rollRad = THREE.MathUtils.degToRad(headRotation.roll + this.params.rotationZ);
 
-      // Interpolation factor (adjust for smoothness)
-      const lerpFactor = 0.1; // 0.1 means 10% of the way to the target per frame
+    const targetQuat = new THREE.Quaternion().setFromEuler(
+      new THREE.Euler(-pitchRad, rollRad, -yawRad)
+    );
 
-      // Apply quaternion slerp for smooth rotation
-      this.model.quaternion.slerp(targetQuat, lerpFactor);
+    // Smooth rotation interpolation
+    this.model.quaternion.slerp(targetQuat, lerpFactor);
 
-      console.log("Updated Rotation:", { yaw: yawRad, pitch: pitchRad, roll: rollRad });
-
-      // Adjust scale dynamically based on face size
-      const deltaScale = 0.02;
-      this.model.scale.set(scale * deltaScale, scale * deltaScale, scale * deltaScale);
-    } else {
-      console.error("Glasses model is not initialized yet");
-    }
+    // Adjust scale dynamically
+    const deltaScale = 0.02;
+    this.model.scale.set(
+      scale * deltaScale * this.params.scale,
+      scale * deltaScale * this.params.scale,
+      scale * deltaScale * this.params.scale
+    );
   }
 
+  /**
+   * GUI for manual fine-tuning.
+   */
+  createGUI() {
+    const gui = new GUI();
 
+    gui.add(this.params, "scale", 0.1, 5.0);
+    gui.add(this.params, "offsetX", -0.6, -0.3);
+    gui.add(this.params, "offsetY", 0, 1);
+    gui.add(this.params, "offsetZ", -2, 2);
+    gui.add(this.params, "rotationX", -180, 180);
+    gui.add(this.params, "rotationY", -180, 180);
+    gui.add(this.params, "rotationZ", -180, 180);
+    gui.add(this.params, "scaleFactor", 0.1, 3.0);
+  }
 }
