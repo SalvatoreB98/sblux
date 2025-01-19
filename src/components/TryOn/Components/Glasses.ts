@@ -29,9 +29,6 @@ export class Glasses extends EventEmitter {
         this.model = gltf.scene;
         this.model.scale.set(0.1, 0.1, 0.1);
         this.model.position.set(0, 0, 1);
-        const bbox = new THREE.Box3().setFromObject(this.model);
-        const modelCenter = bbox.getCenter(new THREE.Vector3());
-        this.model.position.sub(modelCenter); // Shift the model so its center aligns with the origin
         scene.add(this.model);
         this.emitter.emit("loaded", this.model);
       },
@@ -48,18 +45,16 @@ export class Glasses extends EventEmitter {
   updatePosition(facePosition: THREE.Vector3, headPosition: any, headRotation: IHeadRotation, scale: number) {
     if (!this.model) return;
 
-    const headWidth = Math.abs(headPosition.x - facePosition.x); // Distance between facial landmarks
-    const sceneScaleFactor = headWidth * 2; // Dynamically scale glasses based on head size
+    const sceneScaleFactor = this.params.scaleFactor;
     const smoothFactor = 0.2;
     const lerpFactor = 0.1;
 
     // Blend GUI modifications with real-time tracking data
     const mappedPosition = new THREE.Vector3(
-      headPosition.x * sceneScaleFactor,
-      -headPosition.y * sceneScaleFactor,
-      headPosition.z * sceneScaleFactor
+      (headPosition.x + this.params.offsetX) * sceneScaleFactor,
+      (-headPosition.y + this.params.offsetY) * sceneScaleFactor,
+      (headPosition.z + this.params.offsetZ) * sceneScaleFactor
     );
-    this.model.position.lerp(mappedPosition, smoothFactor);
 
     // Smoothly interpolate position
     this.model.position.lerp(mappedPosition, smoothFactor);
@@ -93,7 +88,7 @@ export class Glasses extends EventEmitter {
 
     gui.add(this.params, "scale", 0.1, 5.0);
     gui.add(this.params, "offsetX", -0.6, -0.3);
-    gui.add(this.params, "offsetY", 0, 1);
+    gui.add(this.params, "offsetY", 0.46, 0.56);
     gui.add(this.params, "offsetZ", -2, 2);
     gui.add(this.params, "rotationX", -180, 180);
     gui.add(this.params, "rotationY", -180, 180);
