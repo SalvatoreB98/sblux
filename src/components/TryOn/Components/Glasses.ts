@@ -10,14 +10,14 @@ export class Glasses extends EventEmitter {
 
   // GUI-controlled parameters
   params = {
-    scale: 1.25,
-    offsetX: -0.50,
-    offsetY: 0.54,
-    offsetZ: 0.2,
+    scale: 0.60,
+    offsetX: -0.51,
+    offsetY: 0.476,
+    offsetZ: 0.24,
     rotationX: 0,
     rotationY: 0,
     rotationZ: 0,
-    scaleFactor: 2.5
+    scaleFactor: 1.78
   };
 
   constructor(scene: THREE.Scene) {
@@ -87,8 +87,8 @@ export class Glasses extends EventEmitter {
     const gui = new GUI();
 
     gui.add(this.params, "scale", 0.1, 5.0);
-    gui.add(this.params, "offsetX", -0.6, -0.3);
-    gui.add(this.params, "offsetY", 0.46, 0.56);
+    gui.add(this.params, "offsetX", -1, 1);
+    gui.add(this.params, "offsetY", -2, 2);
     gui.add(this.params, "offsetZ", -2, 2);
     gui.add(this.params, "rotationX", -180, 180);
     gui.add(this.params, "rotationY", -180, 180);
